@@ -79,13 +79,13 @@
         <el-dialog title="编辑" :visible.sync="editVisible" width="30%">
             <el-form ref="form" :model="form" label-width="70px">
                 <el-form-item label="用户名">
-                    <el-input v-model="form.name"></el-input>
+                    <el-input v-model="form.username"></el-input>
                 </el-form-item>
                 <el-form-item label="密码">
-                    <el-input v-model="form.address"></el-input>
+                    <el-input v-model="form.password"></el-input>
                 </el-form-item>
                 <el-form-item label="验证码">
-                    <el-input v-model="form.address">
+                    <el-input v-model="form.code">
                     </el-input>
                 </el-form-item>
                 <el-image
@@ -94,7 +94,7 @@
             </el-form>
             <span slot="footer" class="dialog-footer">
                 <el-button @click="editVisible = false">取 消</el-button>
-                <el-button type="primary" @click="saveEdit">确 定</el-button>
+                <el-button type="primary" @click="HandelLogin">确 定</el-button>
             </span>
         </el-dialog>
     </div>
@@ -122,6 +122,7 @@ export default {
             res:[],
             url:"",
             fits: ['fill', 'contain', 'cover', 'none', 'scale-down'],
+            platform:""
         };
     },
     created() {
@@ -187,6 +188,30 @@ export default {
         },
         LoginPlatform(row){
 
+
+            this.platform=row.Platform
+        },
+        HandelLogin(){
+            let params = new URLSearchParams()
+            params.append("username",this.form.username)
+            params.append("password",this.form.password)
+            params.append("code",this.form.code)
+            params.append("platform",this.platform)
+            this.axios.post('http://127.0.0.1:8077/game/login',params).then((res)=>{
+                console.log(res.data)
+                //将adminId保存进session
+                if(res.data.code){
+                    this.$message.success(res.data.info);
+
+
+                }else{
+                    this.$message.error(res.data.info);
+                }
+                //sessionStorage.setItem('adminId',res.data[0][0])
+                //this.$router.push({path:'/'})
+            }).catch(function (error) {
+                console.log(error)
+            });
         },
         // 编辑操作
         handleEdit(index, row) {
@@ -195,6 +220,7 @@ export default {
             this.url="http://127.0.0.1:8077/getCode?platform=pingguo"
             //this.idx = index;
             //this.form = row;
+            this.platform=row.Platform
             this.editVisible = true;
         },
         // 保存编辑
